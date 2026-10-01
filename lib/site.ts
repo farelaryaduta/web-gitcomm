@@ -1,6 +1,6 @@
 export const siteConfig = {
   name: "gitcomm",
-  url: "https://gitcomm.dev",
+  url: "https://gitcomm.web.id",
   author: "farelaryaduta",
   repo: "https://github.com/farelaryaduta/commit-in",
   npm: "https://www.npmjs.com/package/gitcomm",

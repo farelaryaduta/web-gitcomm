@@ -1,26 +1,401 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-plex-sans);
+  --font-mono: var(--font-plex-mono);
+
+  --color-canvas: var(--canvas);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-ink-faint: var(--ink-faint);
+  --color-surface: var(--surface);
+  --color-surface-strong: var(--surface-strong);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-inverted: var(--inverted);
+  --color-inverted-ink: var(--inverted-ink);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+:root,
+[data-theme="light"] {
+  --canvas: #f5f5f3;
+  --ink: #17171a;
+  --ink-muted: #4e4e55;
+  --ink-faint: #5e5e66;
+  --surface: #fdfdfc;
+  --surface-strong: #eaeae7;
+  --line: #e0e0dc;
+  --line-strong: #c2c2bc;
+  --dot: #a5a59d;
+  --inverted: #17171a;
+  --inverted-ink: #f7f7f5;
+  color-scheme: light;
+}
+
+[data-theme="dark"] {
+  --canvas: #0b0b0c;
+  --ink: #f1f1ef;
+  --ink-muted: #b5b5b5;
+  --ink-faint: #9a9a9a;
+  --surface: #131314;
+  --surface-strong: #1e1e20;
+  --line: #26262a;
+  --line-strong: #3b3b41;
+  --dot: #55555e;
+  --inverted: #f1f1ef;
+  --inverted-ink: #0b0b0c;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
 
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--canvas);
+  color: var(--ink);
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-feature-settings: "cv05", "ss01";
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background-color: var(--ink);
+  color: var(--canvas);
+}
+
+:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 2px;
+  border-radius: 1px;
+}
+
+/* Numeric columns (flag tables, diffs) stay aligned */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+/* Commit-log motif used to separate top-level sections */
+.commit-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.commit-rule::after {
+  content: "";
+  height: 1px;
+  flex: 1;
+  background-color: var(--line);
+}
+
+.commit-rule > span {
+  flex: none;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* Theme tokens are inherited by everything, so a short transition on the
+   colour properties makes the swap dissolve instead of snapping. */
+:root {
+  --theme-transition: background-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+    color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+    border-color 420ms cubic-bezier(0.4, 0, 0.2, 1),
+    fill 420ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+body,
+header,
+footer,
+main,
+section,
+div,
+a,
+button,
+p,
+h1,
+h2,
+h3,
+h4,
+li,
+dt,
+dd,
+th,
+td,
+code,
+pre,
+span {
+  transition: var(--theme-transition);
+}
+
+/*
+ * When the View Transitions API drives the swap, the browser fades the two
+ * snapshots itself. Suppress the per-element transitions so the two do not
+ * stack and produce a muddy double-dissolve.
+ */
+html:active-view-transition body * {
+  transition: none !important;
+}
+
+html:active-view-transition::view-transition-old(root),
+html:active-view-transition::view-transition-new(root) {
+  animation-duration: 480ms;
+  animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  mix-blend-mode: normal;
+}
+
+html:active-view-transition::view-transition-old(root) {
+  animation-name: theme-out;
+}
+
+html:active-view-transition::view-transition-new(root) {
+  animation-name: theme-in;
+}
+
+@keyframes theme-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes theme-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/*
+ * Closing-section wordmark. Deliberately quiet: monospace, a blinking caret
+ * like a shell prompt, and a rule that wipes out from the centre. No glow.
+ */
+.mark {
+  position: relative;
+  display: inline-block;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.mark-caret {
+  display: inline-block;
+  margin-left: 0.08em;
+  width: 0.42em;
+  height: 0.82em;
+  translate: 0 0.08em;
+  background: var(--ink);
+  animation: caret-blink 1.15s steps(1) infinite;
+}
+
+@keyframes caret-blink {
+  0%,
+  49% {
+    opacity: 1;
+  }
+  50%,
+  100% {
+    opacity: 0;
+  }
+}
+
+.mark-rule {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -0.14em;
+  height: 1px;
+  background: var(--line-strong);
+  transform: scaleX(0);
+  transform-origin: center;
+  animation: mark-rule-in 620ms cubic-bezier(0.4, 0, 0.2, 1) 200ms forwards;
+}
+
+@keyframes mark-rule-in {
+  to {
+    transform: scaleX(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mark-caret {
+    animation: none;
+  }
+
+  .mark-rule {
+    animation: none;
+    transform: scaleX(1);
+  }
+}
+
+/*
+ * Read-next grid has 7 pages, so the last row leaves gaps. Rather than fill
+ * them with noise, they carry the wordmark as a watermark: oversized, low
+ * opacity, and cropped by the cell so it reads as texture, not a second
+ * headline. The 4% opacity is the whole point; raising it makes the cell
+ * compete with the real links next to it.
+ */
+.read-next-watermark {
+  position: relative;
+  min-height: 9rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: clamp(2.25rem, 6vw, 3.75rem);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1;
+  color: var(--ink);
+  opacity: 0.06;
+  user-select: none;
+}
+
+/* Both cells sit centered with identical treatment. */
+.read-next-watermark-alt {
+  align-items: center;
+  padding-bottom: 0;
+  opacity: 0.06;
+}
+
+/* Canvas particles are drawn in JS; this only clips and fades the layer. */
+.hero-particles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    black 0%,
+    black 62%,
+    transparent 100%
+  );
+  mask-image: linear-gradient(to bottom, black 0%, black 62%, transparent 100%);
+}
+
+.prose-docs {
+  font-size: 1rem;
+  line-height: 1.75;
+  color: var(--ink-muted);
+}
+
+.prose-docs > * + * {
+  margin-top: 1.25rem;
+}
+
+.prose-docs h2 {
+  font-size: 1.5rem;
+  line-height: 1.3;
+  font-weight: 600;
+  letter-spacing: -0.015em;
+  color: var(--ink);
+  margin-top: 3rem;
+  scroll-margin-top: 6rem;
+}
+
+.prose-docs h3 {
+  font-size: 1.0625rem;
+  line-height: 1.4;
+  font-weight: 600;
+  color: var(--ink);
+  margin-top: 2rem;
+  scroll-margin-top: 6rem;
+}
+
+.prose-docs strong {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.prose-docs a {
+  color: var(--ink);
+  text-decoration: underline;
+  text-decoration-color: var(--line-strong);
+  text-underline-offset: 3px;
+  transition: text-decoration-color 150ms ease;
+}
+
+.prose-docs a:hover {
+  text-decoration-color: var(--ink);
+}
+
+.prose-docs ul,
+.prose-docs ol {
+  padding-left: 1.25rem;
+}
+
+.prose-docs ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose-docs ul > li {
+  position: relative;
+  padding-left: 1.25rem;
+}
+
+.prose-docs ul > li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.75em;
+  width: 6px;
+  height: 1px;
+  background-color: var(--line-strong);
+}
+
+.prose-docs ol {
+  list-style: decimal;
+}
+
+.prose-docs ol > li::marker {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.8125rem;
+  color: var(--ink-faint);
+}
+
+.prose-docs li + li {
+  margin-top: 0.5rem;
+}
+
+.prose-docs li > ul,
+.prose-docs li > ol {
+  margin-top: 0.5rem;
+}
+
+.prose-docs :not(pre) > code {
+  font-family: var(--font-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+  background-color: var(--surface-strong);
+  border: 1px solid var(--line);
+  border-radius: 3px;
+  padding: 0.1em 0.35em;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.prose-docs blockquote {
+  border-left: 2px solid var(--line-strong);
+  padding-left: 1rem;
+  color: var(--ink-muted);
+}
+
+.prose-docs hr {
+  border: 0;
+  height: 1px;
+  background-color: var(--line);
 }

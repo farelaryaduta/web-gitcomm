@@ -1,36 +1,43 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# gitcomm-website
 
-## Getting Started
+Documentation website for [gitcomm](https://github.com/farelaryaduta/commit-in), built with Next.js 16 (App Router, Turbopack), React 19, TypeScript, and Tailwind CSS v4.
 
-First, run the development server:
+## Getting started
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Script | Purpose |
+| --- | --- |
+| `npm run dev` | Start the dev server |
+| `npm run build` | Production build |
+| `npm run start` | Serve the production build |
+| `npm run lint` | ESLint |
+| `npx tsc --noEmit` | Type check (run `npx next typegen` first) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Content
 
-## Learn More
+Docs live in `lib/docs.ts` as a typed registry. Each page has a `title`, `summary`, and a `body` array of typed blocks rendered by `components/doc-content.tsx`. Slugs come from the entry itself, so adding a page to the array adds it to the left nav, right TOC, `generateStaticParams`, and the sitemap.
 
-To learn more about Next.js, take a look at the following resources:
+Content is derived from the real package: its README and `src/cli.ts` in `farelaryaduta/commit-in`. Keep flags and defaults in sync with the source rather than guessing.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+| Path | Role |
+| --- | --- |
+| `app/` | Routes: home, `docs/[slug]`, `not-found`, `sitemap.ts`, `robots.ts` |
+| `components/` | Shell, nav, TOC, code block, prose renderers, JSON-LD |
+| `lib/docs.ts` | Docs registry and heading extraction |
+| `lib/site.ts` | Site name, author, repo/npm links, canonical URL |
 
-## Deploy on Vercel
+Everything is static or SSG. No CMS, no MDX pipeline, no client data fetching.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Theming
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Strict monochrome in both modes. Tokens live in `app/globals.css` under `:root` and `[data-theme="dark"]`. Colors use Tailwind v4 `@theme` aliases (`--color-line`, `--color-ink`, etc.), so components reference `border-line`, `text-ink-muted`, and similar. The theme toggle writes `localStorage.gitcomm-theme` and an inline script in `app/layout.tsx` applies it before paint to avoid a flash.
+
+Before shipping, confirm the production domain: `siteConfig.url` in `lib/site.ts` drives canonical URLs, OpenGraph, sitemap, robots, and JSON-LD.

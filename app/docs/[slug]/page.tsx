@@ -1,11 +1,12 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Breadcrumbs } from "@/components/breadcrumbs";
 import { DocContent } from "@/components/doc-content";
 import { DocJsonLd } from "@/components/json-ld";
 import { DocsNav } from "@/components/docs-nav";
 import { TableOfContents, TocList } from "@/components/table-of-contents";
-import { docPages, getDocPage, getHeadings } from "@/lib/docs";
+import { docPages, getDocPage, getDocTrail, getHeadings } from "@/lib/docs";
 import { siteConfig } from "@/lib/site";
 
 export function generateStaticParams() {
@@ -31,11 +32,13 @@ export async function generateMetadata({
       description,
       url: `${siteConfig.url}/docs/${page.slug}`,
       type: "article",
+      images: [siteConfig.ogImage],
     },
     twitter: {
       card: "summary_large_image",
       title: `${page.title} · gitcomm`,
       description,
+      images: [siteConfig.ogImage],
     },
   };
 }
@@ -49,6 +52,7 @@ export default async function DocPageRoute({
   if (!page) notFound();
 
   const headings = getHeadings(page);
+  const trail = getDocTrail(page);
   const index = docPages.findIndex((entry) => entry.slug === page.slug);
   const previous = index > 0 ? docPages[index - 1] : undefined;
   const next = index < docPages.length - 1 ? docPages[index + 1] : undefined;
@@ -64,6 +68,9 @@ export default async function DocPageRoute({
         </aside>
 
         <article className="min-w-0 border-line px-6 py-10 sm:px-10 lg:border-r xl:border-r-0">
+          <div className="mb-6">
+            <Breadcrumbs trail={trail} />
+          </div>
           <p className="font-mono text-[11px] uppercase tracking-[0.12em] text-ink-faint">
             Documentation
           </p>

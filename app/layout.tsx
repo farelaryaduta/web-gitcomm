@@ -44,12 +44,14 @@ export const metadata: Metadata = {
     description:
       "AI-powered commit messages that match your repository's style. Reads your diff, learns your history, commits for you.",
     url: siteConfig.url,
+    images: [siteConfig.ogImage],
   },
   twitter: {
     card: "summary_large_image",
     title: "gitcomm — commit messages that match your repo's style",
     description:
       "AI-powered commit messages that match your repository's style. Reads your diff, learns your history, commits for you.",
+    images: [siteConfig.ogImage],
   },
   robots: {
     index: true,

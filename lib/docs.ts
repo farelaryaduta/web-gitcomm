@@ -30,6 +30,11 @@ export type DocHeading = {
   level: 2 | 3;
 };
 
+export type DocCrumb = {
+  name: string;
+  href: string;
+};
+
 const gettingStarted: DocPage = {
   slug: "getting-started",
   title: "Getting Started",
@@ -893,4 +898,19 @@ export function getHeadings(page: DocPage): DocHeading[] {
     }
   }
   return headings;
+}
+
+/**
+ * One trail for both the rendered breadcrumbs and the BreadcrumbList JSON-LD,
+ * so the two can never disagree. `/docs` is a permanent redirect, so the parent
+ * crumb points at the first real page instead of at the redirect, and the first
+ * page drops the parent rather than linking to itself.
+ */
+export function getDocTrail(page: DocPage): DocCrumb[] {
+  const home: DocCrumb = { name: "Home", href: "/" };
+  const current: DocCrumb = { name: page.title, href: `/docs/${page.slug}` };
+
+  if (page.slug === "getting-started") return [home, current];
+
+  return [home, { name: "Docs", href: "/docs/getting-started" }, current];
 }

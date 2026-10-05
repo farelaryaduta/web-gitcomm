@@ -1,4 +1,15 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+// A 404 gets `noindex` from Next.js already, but the root layout asks for
+// `index, follow`, so it has to be overridden. The canonical is dropped rather
+// than pointing every missing URL at the homepage.
+export const metadata: Metadata = {
+  title: "Page not found",
+  description: "That path does not exist on gitcomm.web.id.",
+  alternates: { canonical: null },
+  robots: { index: false, follow: true },
+};
 
 export default function NotFound() {
   return (
